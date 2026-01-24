@@ -1,0 +1,141 @@
+---
+import toothlessGifWebm from "../assets/toothless.webm";
+import toothlessGifMp4 from "../assets/toothless.mp4";
+import Sidebar from "../components/Sidebar.astro";
+import MatrixWall from "../components/MatrixWall.astro";
+import MultiBox from "../components/MultiBox.astro";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta
+      name="description"
+      content="kaka nest is all about me and the stuff i enjoy doing, like tech, drama, programming and reading!"
+    />
+    <title>Kaka Nest</title>
+  </head>
+  <body>
+    <div id="main">
+      <header style="font-size: xx-large; ">Kaka Nest</header>
+      <section class="main_section">
+        <h1 style="text-align: left">Hello peoples!</h1>
+        <video autoplay muted loop playsinline class="toothless-image">
+          <source src={toothlessGifWebm} type="video/webm" />
+          <source src={toothlessGifMp4} type="video/mp4" />
+        </video>
+        <div class="inner">
+          <p>
+            Welcome to kaka nest, a small site dedicated to my posts about
+            computer, linux and other hobbies. It also might have some secrets
+            >:) feel free to look around and have fun :)
+            <br />
+            <br />
+            P.S. this is very in progress!
+          </p>
+        </div>
+        <hr class="dothr" />
+        <div style="text-align: center;">
+          <a href="/guestbook">Say hi!</a>
+        </div>
+      </section>
+
+      <Sidebar />
+      <MatrixWall />
+
+      <MultiBox />
+
+      <section class="footer-section">
+        <div>
+          <a href="https://pollygon.dev/" target="_blank"
+            ><img
+              src="https://pollygon.dev/pollygon-2.gif"
+              height="31px"
+              width="88px"
+            /></a
+          >
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
+
+
+<style>
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background: linear-gradient(#537d5d, #73946b, #9ebc8a);
+  }
+
+  header {
+    grid-area: header;
+  }
+
+  #main {
+    display: grid;
+    grid-template-areas:
+      "header intro   none"
+      "navi   intro   intrests"
+      "navi   hacker  intrests"
+      "footer footer  pic";
+    /* grid-template-columns: 80ch 120ch 100ch; */
+    /* grid-template-rows: 60px 3fr 2fr 1fr; */
+    grid-gap: 20px;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .main_section {
+    grid-area: intro;
+    margin-top: 50px;
+    height: fit-content;
+    color: white;
+    border: 2px solid purple;
+    background-color: black;
+    max-width: 50ch;
+    padding: 20px;
+    position: relative;
+  }
+
+  .footer-section {
+    grid-area: footer;
+    display: flex;
+    background-color: #9ebc8a;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+    /* position: relative; */
+  }
+
+  .footer-section a {
+    display: inline-block; /* required for transform to work properly */
+    transition: transform 150ms ease;
+    width: 120%;
+    height: 120%;
+  }
+
+  .footer-section a:hover {
+    transform: scale(1.1);
+  }
+
+  .main_section > .inner {
+    overflow: auto;
+    height: 150px;
+  }
+
+  .toothless-image {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: auto;
+    height: 150px;
+    background-color: none;
+  }
+</style>

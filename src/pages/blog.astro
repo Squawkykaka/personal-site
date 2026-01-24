@@ -1,0 +1,308 @@
+---
+import WindowPost from "../components/WindowPost.astro";
+import WindowApp from "../components/WindowApp.astro";
+const posts = Object.values(
+    import.meta.glob("./posts/*.md", { eager: true }),
+);
+---
+
+<div class="main">
+    <aside class="statusBar">
+        <div class="top">
+            <h2>My Posts</h2>
+            <div class="status-button-group" id="statusButtonGroup"></div>
+        </div>
+
+        <div class="bottom">
+            <a href="/"><button>Home</button></a>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+        </div>
+    </aside>
+
+    <div class="manager-container">
+        <div class="window-manager">
+            {
+                posts.map((post) => (
+                    <WindowApp title={post.frontmatter.title} url={post.url}>
+                        <WindowPost post={post} />
+                    </WindowApp>
+                ))
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function getClassNames(elements: Element[]): Map<Element, DOMRect> {
+        const rects = new Map();
+        elements.forEach((el) => {
+            rects.set(el, el.getBoundingClientRect());
+        });
+
+        return rects;
+    }
+
+    function animateMovePositions(
+        firstRects: Map<Element, DOMRect>,
+        newElems: Element[],
+    ) {
+        newElems.forEach((el) => {
+            let first = firstRects.get(el)!;
+            let last = el.getBoundingClientRect();
+
+            const dx = first.left - last.left;
+            const dy = first.top - last.top;
+
+            el.animate(
+                [
+                    { transform: `translate(${dx}px, ${dy}px)` },
+                    { transform: "translate(0, 0)" },
+                ],
+                {
+                    duration: 250,
+                    easing: "ease-out",
+                    fill: "both",
+                },
+            );
+        });
+    }
+
+    document.addEventListener("pointerdown", (event) => {
+        console.log(event);
+
+        // event
+        if (
+            !event.target.classList.contains("titlebar") &&
+            !event.target.classList.contains("window-title")
+        )
+            return;
+
+        const win = event.target.closest(".surround");
+        if (!win) return;
+
+        const manager = document.querySelector(".window-manager");
+        const rect = win.getBoundingClientRect();
+
+        // Calculate pointer offset inside the window
+        offsetX = event.clientX - rect.left;
+        offsetY = event.clientY - rect.top;
+
+        // get the old positions of all other windows
+        const firstRects = getClassNames(
+            Array.from(manager.getElementsByClassName("surround")),
+        );
+
+        // Move window out of flex layout to body
+        document.body.appendChild(win);
+        win.style.position = "absolute";
+        win.style.width = `${rect.width}px`;
+        win.style.height = `${rect.height}px`;
+        win.style.left = `${rect.left}px`;
+        win.style.top = `${rect.top}px`;
+        win.style.zIndex = 1000;
+
+        let newElements = Array.from(
+            manager.getElementsByClassName("surround"),
+        );
+
+        animateMovePositions(firstRects, newElements);
+
+        win.setPointerCapture(event.pointerId);
+
+        const moveHandler = (ev) => {
+            win.style.left = `${ev.clientX - offsetX}px`;
+            win.style.top = `${ev.clientY - offsetY}px`;
+        };
+
+        const upHandler = (ev) => {
+            const firstRect = win.getBoundingClientRect();
+
+            // Snap back into flex layout
+            manager.appendChild(win);
+            win.style.position = "";
+            win.style.left = "";
+            win.style.top = "";
+            win.style.width = "";
+            win.style.height = "";
+            win.style.zIndex = "";
+
+            const lastRect = win.getBoundingClientRect();
+
+            const dx = firstRect.left - lastRect.left;
+            const dy = firstRect.top - lastRect.top;
+
+            win.animate(
+                [
+                    { transform: `translate(${dx}px, ${dy}px)` },
+                    { transform: "translate(0, 0)" },
+                ],
+                {
+                    duration: 250,
+                    easing: "ease-out",
+                    fill: "both",
+                },
+            );
+
+            win.releasePointerCapture(ev.pointerId);
+
+            document.removeEventListener("pointermove", moveHandler);
+            document.removeEventListener("pointerup", upHandler);
+        };
+
+        document.addEventListener("pointermove", moveHandler);
+        document.addEventListener("pointerup", upHandler);
+    });
+
+    // deleting windows
+    document.addEventListener("pointerdown", (event) => {
+        const button = event.target.closest('[name="close-button"]');
+        if (!button) return;
+
+        const manager = document.querySelector(".window-manager");
+        const windowToDelete = button.closest(".surround");
+        if (!windowToDelete) return;
+
+        // record positions
+        const firstRects = getClassNames(Array.from(manager.children));
+
+        // 2 Remove window
+        windowToDelete.remove();
+
+        // animate
+        requestAnimationFrame(() => {
+            const remaining = Array.from(manager.children);
+
+            animateMovePositions(firstRects, remaining);
+        });
+
+        const statusButtonGroup = document.getElementById("statusButtonGroup");
+        const statusButton = document.createElement("button");
+        statusButton.className = "window-icon-button";
+        statusButton.innerHTML = `<span class="tooltiptext">${windowToDelete.dataset.title || "Window"}</span>`;
+
+        statusButton.addEventListener("click", () => {
+            manager.appendChild(windowToDelete);
+            statusButton.remove();
+        });
+
+        statusButtonGroup.appendChild(statusButton);
+    });
+</script>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        height: 100%;
+    }
+
+    .main {
+        display: flex;
+        height: 100vh;
+    }
+
+    .statusBar {
+        width: 250px;
+        /* height: %; */
+        background-color: gray;
+        padding: 10px;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+
+    .statusBar > .top {
+        background-color: purple;
+        height: 100%;
+    }
+
+    .statusBar > .bottom {
+        background-color: blue;
+        height: 200px;
+        display: grid;
+        grid-template-columns: 33.33% 33.33% 33.33%;
+    }
+
+    .bottom * {
+        width: 100%;
+        height: 100%;
+    }
+
+    .manager-container {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .window-manager {
+        overflow-y: auto;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        /* justify-content: ; */
+        row-gap: 0;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .surround.dragging {
+        position: absolute;
+        z-index: 1000;
+        pointer-events: none;
+    }
+</style>
+
+<style is:global>
+    .status-button-group {
+        padding: 10px;
+        flex-direction: row;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+    }
+
+    .window-icon-button {
+        width: 50px;
+        height: 50px;
+        background-color: #8fa31e;
+        border: 2px solid black;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .window-icon-button:hover {
+        background-color: #c6d870;
+    }
+
+    .window-icon-button:disabled {
+        background-color: #556b2f;
+    }
+
+    .tooltiptext {
+        visibility: hidden; /* Hidden by default */
+        width: 130px;
+        background-color: black;
+        color: #ffffff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        top: px;
+        position: absolute;
+        top: -40px;
+        left: -100%;
+        padding: 10px;
+        z-index: 1; /* Ensure tooltip is displayed above content */
+    }
+
+    .window-icon-button:hover .tooltiptext {
+        visibility: visible;
+    }
+</style>

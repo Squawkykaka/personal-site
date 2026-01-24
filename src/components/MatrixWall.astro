@@ -1,0 +1,80 @@
+<div class="hacker-matrix">
+  <canvas id="matrix"></canvas>
+</div>
+
+<style>
+  .hacker-matrix {
+    grid-area: hacker;
+    background-color: black;
+    max-height: 200px;
+  }
+
+  .hacker-matrix > canvas {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  const canvas: HTMLCanvasElement = document.getElementById("matrix")!;
+  const ctx = canvas.getContext("2d")!;
+
+  // Set canvas size once
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  window.addEventListener("resize", () => {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  });
+
+  // Characters for the rain
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
+
+  // Font size
+  const fontSize = 16;
+  ctx.font = `${fontSize}px monospace`;
+
+  // Columns
+  const columns = Math.floor(canvas.width / fontSize);
+
+  const drops: { pos: number; cindex: number }[] = [];
+  for (let i = 0; i < columns; i++) {
+    drops[i] = {
+      pos: 1,
+      cindex: Math.floor(Math.random() * letters.length),
+    };
+  }
+
+  function updateDrops() {
+    let time = new Date().getTime();
+    for (let i = 0; i < drops.length; i++) {
+      drops[i].pos += fontSize; // move by fontSize per step
+
+      // Reset drop to top randomly
+      if (drops[i].pos > canvas.height && Math.random() > 0.975) {
+        drops[i].pos = 0;
+        drops[i].cindex = Math.floor(Math.random() * letters.length);
+      }
+    }
+  }
+
+  function drawMatrix() {
+    // Fade effect
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Green text
+    ctx.fillStyle = "#0F0";
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[drops[i].cindex];
+      ctx.fillText(text, i * fontSize, drops[i].pos);
+    }
+
+    requestAnimationFrame(drawMatrix);
+  }
+
+  setInterval(updateDrops, 40);
+
+  drawMatrix();
+</script>

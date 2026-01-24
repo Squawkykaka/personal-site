@@ -1,0 +1,72 @@
+---
+import { Image, Picture } from "astro:assets";
+import letssharewhatweknow from "../assets/letssharewhatweknow.png";
+import sepiarecord from "../assets/sepiarecord.png";
+import nest from "../assets/nest.png";
+---
+
+<aside class="sidebar_section">
+    <h2 style="text-align: center;">Personal</h2>
+    <ul>
+        <li>
+            <a href="/blog">Blog</a>
+        </li>
+        <!-- <li>
+            <a href="/projects">Projects</a>
+        </li>
+        <li>
+            <a href="/guestbook">Guestbook</a>
+        </li>
+        <li>
+            <a href="/things">My favourate things</a>
+        </li> -->
+    </ul>
+
+    <Picture
+        src={nest}
+        formats={["webp"]}
+        alt="an image of a nest"
+        class="nest-image"
+    />
+
+    <h2 style="text-align: center;">BUTTONS!!!</h2>
+    <div class="button-wall">
+        <Picture
+            src={letssharewhatweknow}
+            formats={["webp"]}
+            alt="A button saying lets share what we know."
+        />
+        <Picture
+            src={sepiarecord}
+            formats={["webp"]}
+            alt="A button named sepiarecord"
+        />
+    </div>
+</aside>
+
+<style>
+    * {
+        background-color: red;
+    }
+    .sidebar_section {
+        grid-area: navi;
+        position: relative;
+        max-width: 25ch;
+    }
+
+    .button-wall {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nest-image {
+        position: absolute;
+        height: 70px;
+        width: 70px;
+        right: -20px;
+        top: 220px;
+        transform: rotate(20deg);
+        background-color: none;
+    }
+</style>

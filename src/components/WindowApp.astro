@@ -1,0 +1,116 @@
+---
+interface Props {
+    title: string;
+    url: string;
+}
+
+const { title, url } = Astro.props;
+---
+
+<div class="surround" data-title={title}>
+    <div class="window">
+        <div class="titlebar">
+            <div class="left">
+                <p style="user-select: none;" class="window-title">{title}</p>
+            </div>
+            <div class="right">
+                <a href={url}>[]</a>
+                <button
+                    style="background-color: #FD7979; border-top-right-radius: 10px;"
+                    name="close-button">X</button
+                >
+            </div>
+        </div>
+        <div class="content">
+            <slot />
+        </div>
+    </div>
+</div>
+
+<style>
+    .surround {
+        display: flex;
+        flex-direction: column;
+        min-width: 500px;
+        min-height: 200px;
+        /* padding-bottom: 20px;
+        transition:
+            width 300ms ease,
+            height 300ms ease; */
+    }
+
+    .window {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        border: 10px solid #ffdab3;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+    .titlebar {
+        width: auto;
+        background-color: #ffcdc9;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        text-align: end;
+        display: flex;
+
+        justify-content: space-between;
+    }
+
+    .right {
+        display: flex;
+        justify-content: right;
+    }
+
+    .right > button {
+        height: 100%;
+        aspect-ratio: 1/1;
+        background-color: #fdacac;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .right > button:hover {
+        filter: brightness(90%);
+    }
+
+    .right > a {
+        height: 100%;
+        aspect-ratio: 1 / 1;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        background-color: #fdacac;
+        border: none;
+        border-radius: 5px;
+
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .right > a:hover {
+        filter: brightness(90%);
+    }
+
+    .left {
+        font-weight: 700;
+        font-family: "Lucida Sans";
+        padding-left: 20px;
+        font-size: large;
+        line-height: 0;
+    }
+
+    .content {
+        flex: 1;
+        height: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+        background-color: #feeac9;
+    }
+</style>

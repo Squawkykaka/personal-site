@@ -1,0 +1,11 @@
+- [ ] add some funny animals and nests into the site
+- [ ] add a guestbook
+- [ ] make it so placing an element back into the blog puts it there instead of end
+- [ ] finish writing readme
+- [ ] add more stickers
+- [ ] add to github
+- [ ] do some artwork for page links
+- [ ] add music player to show currently listening music
+- [ ] add games section
+- [ ] add a top hat kaka
+    - [ ] have a little game with the kaka

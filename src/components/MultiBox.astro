@@ -1,0 +1,89 @@
+---
+import Picture from "astro/components/Picture.astro";
+import scrapPaper from "../assets/scrapPaper.webp";
+---
+
+<section class="intrests-section">
+  <div class="content">
+    <Picture
+      src={scrapPaper}
+      format="webp"
+      alt="scrap notebook paper"
+      class="notebookImage"
+    />
+    <div class="write-content">
+      <p>hi</p>
+    </div>
+  </div>
+  <div class="bookmarks">
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>4</button>
+    <button>5</button>
+  </div>
+</section>
+
+<style>
+  .intrests-section {
+    grid-area: intrests;
+    height: 100%;
+    width: 100%;
+    margin-left: 50px;
+    margin-top: 50px;
+    position: relative;
+    min-width: 10rem;
+    overflow: visible;
+  }
+
+  .content {
+    margin-top: 40px;
+    height: 60%;
+    width: 100%;
+    position: relative;
+  }
+
+  .write-content {
+    background-color: red;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notebookImage {
+    position: absolute;
+    inset: 0;
+    width: 140%;
+    height: 140%;
+    left: -20%;
+    top: -20%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .bookmarks {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    margin-top: -20px;
+    /* z-index: -1; */
+    position: relative;
+    pointer-events: all;
+  }
+
+  .bookmarks > button {
+    width: 100%;
+    height: 120px;
+    border-radius: 0 0 20px 20px;
+    border: none;
+    transition: transform 200ms ease;
+    position: relative;
+    z-index: -1;
+  }
+
+  .bookmarks > button:hover {
+    transform: translateY(20px);
+  }
+</style>
