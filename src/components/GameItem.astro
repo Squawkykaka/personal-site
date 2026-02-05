@@ -1,0 +1,49 @@
+---
+interface Props {
+    game: {
+        id: string;
+        data: any;
+        filePath: string;
+    };
+}
+
+const {
+    game: { id, data, filePath },
+}: Props = Astro.props;
+---
+
+<a href=`/games/${id}`>
+    <div id="container">
+        <div id="items">
+            <h2>{data.title}</h2>
+            <p>{data.description}</p>
+        </div>
+    </div>
+</a>
+
+<style>
+    #container {
+        border: double 1em transparent;
+        background-image:
+            linear-gradient(white, white),
+            linear-gradient(to right, green, gold);
+        border-radius: 100%;
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+
+        height: 100%;
+        aspect-ratio: 1 / 1;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+
+    #items {
+        padding: 20px;
+    }
+
+    #items * {
+        flex: 0;
+
+    }
+</style>

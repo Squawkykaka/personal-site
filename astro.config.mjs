@@ -1,25 +1,14 @@
 // @ts-check
-import { defineConfig, passthroughImageService } from "astro/config";
+import { defineConfig } from "astro/config";
 
-import cloudflare from "@astrojs/cloudflare";
-// import sharp from "sharp";
+// this import makes it so sharp is loaded by bun, otherwise astro errors out
+import sharp from "sharp";
 
 // https://astro.build/config
 export default defineConfig({
   image: {
-    service: passthroughImageService(),
-    // service: {
-    //   entrypoint: "astro/assets/services/sharp",
-    //   // config: {
-    //   //   limitInputPixels: false,
-    //   // },
-    // },
+    service: {
+      entrypoint: "astro/assets/services/sharp",
+    },
   },
-
-  // adapter: cloudflare({
-  //   imageService: "compile",
-  //   platformProxy: {
-  //     enabled: true,
-  //   }
-  // })
 });

@@ -9,9 +9,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.12",
-    "astro": "5.16.14",
+    "@astrojs/check": "^0.9.6",
+    "astro": "5.17.1",
     "sharp": "^0.34.5",
-    "wrangler": "^4.60.0"
+    "toml": "^3.0.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.62.0"
+  },
+  "devDependencies": {
+    "@webgpu/types": "^0.1.69"
   }
 }

@@ -19,7 +19,7 @@ import MultiBox from "../components/MultiBox.astro";
     <title>Kaka Nest</title>
   </head>
   <body>
-    <div id="main">
+    <div class="main">
       <header style="font-size: xx-large; ">Kaka Nest</header>
       <section class="main_section">
         <h1 style="text-align: left">Hello peoples!</h1>
@@ -43,7 +43,9 @@ import MultiBox from "../components/MultiBox.astro";
         </div>
       </section>
 
-      <Sidebar />
+      <section class="sidebar">
+        <Sidebar />
+      </section>
       <MatrixWall />
 
       <MultiBox />
@@ -63,34 +65,62 @@ import MultiBox from "../components/MultiBox.astro";
   </body>
 </html>
 
-
 <style>
   html,
   body {
     height: 100%;
+    width: 100%;
     margin: 0;
   }
 
   body {
     background: linear-gradient(#537d5d, #73946b, #9ebc8a);
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
   }
 
   header {
     grid-area: header;
   }
 
-  #main {
+  .main {
     display: grid;
     grid-template-areas:
       "header intro   none"
       "navi   intro   intrests"
       "navi   hacker  intrests"
       "footer footer  pic";
-    /* grid-template-columns: 80ch 120ch 100ch; */
-    /* grid-template-rows: 60px 3fr 2fr 1fr; */
+    grid-template-columns: repeat(3, minmax(1fr, 150px));
+    grid-template-rows: repeat(4, 150px);
     grid-gap: 20px;
     justify-content: center;
     padding: 40px;
+  }
+
+  .sidebar {
+    grid-area: navi;
+    position: relative;
+    max-width: 25ch;
+  }
+
+  @media (max-width: 700px) {
+    .main {
+      grid-template-areas:
+        "header header"
+        "intro intro"
+        "intro intro"
+        "hacker hacker"
+        "intrests intrests"
+        "footer pic";
+
+      grid-template-columns: 1fr;
+      padding: 20px;
+    }
+
+    .sidebar {
+      display: none;
+    }
   }
 
   .main_section {

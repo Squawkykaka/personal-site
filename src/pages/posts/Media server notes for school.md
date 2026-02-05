@@ -7,6 +7,7 @@ tags:
   - "#school"
   - "#mediaserver"
   - "#test"
+description: "Notes of my media server assignment for school, a basic one where i hosted jellyfin"
 ---
 Media Server Assignment
 

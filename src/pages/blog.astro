@@ -1,9 +1,8 @@
 ---
-import WindowPost from "../components/WindowPost.astro";
 import WindowApp from "../components/WindowApp.astro";
-const posts = Object.values(
-    import.meta.glob("./posts/*.md", { eager: true }),
-);
+import { getCollection } from "astro:content";
+
+const posts = await getCollection('posts');
 ---
 
 <div class="main">
@@ -27,8 +26,8 @@ const posts = Object.values(
         <div class="window-manager">
             {
                 posts.map((post) => (
-                    <WindowApp title={post.frontmatter.title} url={post.url}>
-                        <WindowPost post={post} />
+                    <WindowApp title={post.data.title} url={post.data.title}>
+                        <p>{post.data.description}</p>
                     </WindowApp>
                 ))
             }
@@ -116,12 +115,12 @@ const posts = Object.values(
 
         win.setPointerCapture(event.pointerId);
 
-        const moveHandler = (ev) => {
+        const moveHandler = (ev: PointerEvent) => {
             win.style.left = `${ev.clientX - offsetX}px`;
             win.style.top = `${ev.clientY - offsetY}px`;
         };
 
-        const upHandler = (ev) => {
+        const upHandler = (ev: PointerEvent) => {
             const firstRect = win.getBoundingClientRect();
 
             // Snap back into flex layout

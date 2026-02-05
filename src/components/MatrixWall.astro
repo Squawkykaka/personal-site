@@ -16,7 +16,7 @@
 </style>
 
 <script>
-  const canvas: HTMLCanvasElement = document.getElementById("matrix")!;
+  const canvas = document.getElementById("matrix") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d")!;
 
   // Set canvas size once
@@ -46,7 +46,6 @@
   }
 
   function updateDrops() {
-    let time = new Date().getTime();
     for (let i = 0; i < drops.length; i++) {
       drops[i].pos += fontSize; // move by fontSize per step
 
