@@ -12,7 +12,7 @@ const {
 }: Props = Astro.props;
 ---
 
-<a href=`/games/${id}`>
+<a href=`${import.meta.env.BASE_URL}/games/${id}`>
     <div id="container">
         <div id="items">
             <h2>{data.title}</h2>

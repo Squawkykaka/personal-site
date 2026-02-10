@@ -6,6 +6,13 @@ import sharp from "sharp";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://squawkykaka.github.io",
+  base: "/personal-site",
+  vite: {
+    esbuild: {
+      legalComments: "external",
+    },
+  },
   image: {
     service: {
       entrypoint: "astro/assets/services/sharp",

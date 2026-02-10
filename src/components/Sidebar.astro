@@ -8,19 +8,8 @@ import nest from "../assets/nest.png";
 <aside>
   <h2 style="text-align: center;">Personal</h2>
   <ul>
-    <li>
-      <a href="/blog">Blog</a>
-    </li>
-    <li><a href="/games">My Games</a></li>
-    <!-- <li>
-            <a href="/projects">Projects</a>
-        </li>
-        <li>
-            <a href="/guestbook">Guestbook</a>
-        </li>
-        <li>
-            <a href="/things">My favourate things</a>
-        </li> -->
+      <a href=`${import.meta.env.BASE_URL}/blog`>Blog</a>
+      <a href=`${import.meta.env.BASE_URL}/games`>My Games</a>
   </ul>
 
   <Picture
@@ -49,6 +38,11 @@ import nest from "../assets/nest.png";
   aside {
     background-color: red;
     height: 100%;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
   }
 
   .button-wall {
