@@ -1,21 +1,17 @@
-struct OurVertexShaderOutput {
-    @builtin(position) position: vec4f,
-    @location(0) fragPos: vec2f,
-};
+@group(0) @binding(0)
+var tex : texture_2d<f32>;
 
-struct UniformInput {
-    color: vec4f,
-    scale: vec2f,
-    time: f32,
-    mouse: vec2f,
-    // canvas: vec2f,
-}
+// @group(0) @binding(1)
+// var samp : sampler;
 
-@group(0) @binding(0) var<uniform> inputUniform: UniformInput;
+// struct OurVertexShaderOutput {
+    
+//     @location(0) fragPos: vec2f,
+// };
 
 @vertex fn vs(
     @builtin(vertex_index) vertexIndex: u32
-) -> OurVertexShaderOutput {
+) -> @builtin(position) vec4f {
     let pos = array(
         vec2f( -1.0,  1.0),  // top center
         vec2f(-1.0, -1.0),  // bottom left
@@ -26,33 +22,23 @@ struct UniformInput {
         vec2f( 1.0, -1.0)   // bottom right
     );
 
-    // var color = array<vec4f, 6>(
-    // vec4f(1, 0, 0, 1), // red
-    // vec4f(0, 1, 0, 1), // green
-    // vec4f(0, 0, 1, 1), // blue
+    // var vsOutput: OurVertexShaderOutput;
+    // vsOutput.position = ;
 
-    // vec4f(0, 1, 0, 1), // green
-    // vec4f(1, 0, 0, 1), // red
-    // vec4f(0, 0, 1, 1), // blue
-    // );
-
-    var vsOutput: OurVertexShaderOutput;
-    vsOutput.position = vec4f(pos[vertexIndex] , 0.0, 1.0);
-    vsOutput.fragPos = pos[vertexIndex] ; // NDC position
-
-    return vsOutput;
+    return vec4f(pos[vertexIndex] , 0.0, 1.0);
 }
 
-@fragment fn fs(fsInput: OurVertexShaderOutput) -> @location(0) vec4f {
-    let mouse = vec2(inputUniform.mouse.x * inputUniform.scale.x, inputUniform.mouse.y);
-    let uv = vec2(fsInput.fragPos.x * inputUniform.scale.x, fsInput.fragPos.y);
+@fragment
+fn fs(@builtin(position) pos : vec4<f32>) -> @location(0) vec4<f32> {
+    let dims = vec2<i32>(textureDimensions(tex));
+    
+    // Convert clip-space to integer pixel coordinates
+    // pos.xy is in screen pixel space, usually already in [0, width/height]
+    var coord = vec2<i32>(pos.xy);
+    
+    // Clamp to valid range
+    coord = clamp(coord, vec2<i32>(0,0), dims - vec2<i32>(1,1));
 
-    let dist = distance(uv, mouse);
-    let radius = 0.15;
-
-    // Smooth edge
-    let circle = smoothstep(radius, radius - 0.01, dist);
-
-    let color = vec3(1.0, 0.2, 0.2); // red circle
-    return vec4f(color * circle, 1.0);
+    let color = textureLoad(tex, coord, 0);
+    return color;
 }

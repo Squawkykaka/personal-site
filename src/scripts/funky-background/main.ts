@@ -1,11 +1,12 @@
 import triangleWGSL from './triangle.wgsl?raw';
+import computeWGSL from './compute.wgsl?raw';
 
 const canvas = document.getElementById("background") as HTMLCanvasElement;
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 let rect = canvas.getBoundingClientRect()
 
-let mouse = {x:0,y:0};
+let mouse = { x: 0, y: 0 };
 document.addEventListener("pointermove", event => {
     mouse = {
         x: event.clientX - rect.left,
@@ -28,13 +29,51 @@ async function main() {
         format: presentationFormat,
     });
 
+    const computeShader = device.createShaderModule({ code: computeWGSL });
+    const computeTexture = device.createTexture({
+        size: [canvas.width, canvas.height, 1],
+        format: 'r32float',
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+    })
+    const computePipeline = device.createComputePipeline({
+        compute: {
+            module: computeShader,
+        },
+        layout: "auto",
+        label: 'compute image writing + growth thing'
+    });
+    const computeUniformSize =
+        2 * 4 + // scale
+        4 * 4 + // mouseX(vec2f)
+        8 * 4  // color (vec4)
+        ;
+    const cScaleOffset = 0;
+    const cMouseOffset = 4;
+    const cColorOffset = 8;
+    const computeUniformBuffer = device.createBuffer({
+        label: 'Compute uniform buffer',
+        size: computeUniformSize,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    })
+    const computeUniformValues = new Float32Array(computeUniformSize / 4);
+    const computeBindGroup = device.createBindGroup({
+        layout: computePipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: computeTexture.createView() },
+            { binding: 1, resource: computeUniformBuffer }
+        ]
+    })
+
+    // ***************
+    // RENDER
+
     const module = device.createShaderModule({
-        label: 'our hardcoded rgb triangle shaders',
+        label: 'render stage',
         code: triangleWGSL
     })
 
     const pipeline = device.createRenderPipeline({
-        label: 'our hardcoded red triangle pipelie',
+        label: 'rendering pipeline for background',
         layout: 'auto',
         vertex: {
             module
@@ -45,32 +84,10 @@ async function main() {
         },
     });
 
-    // const staticUniformBufferSize = 
-    //     4 + 4 + // color (vec4)
-    //     2 * 4 // 
-
-    const uniformBufferSize =
-        4 * 4 + // Color (vec4)
-        2 * 4 + // scale
-        2 * 4 +  // time
-        4 * 4  // mouseX(vec2f)
-        // 4 * 4  // canvas(vec2f)
-        ;
-    const kScaleOffset = 4;
-    const kTimeOffset = 6;
-    const kMouseOffset = 8;
-    const kCanvasOffset = 12;
-    const uniformBuffer = device.createBuffer({
-        size: uniformBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    })
-    const uniformValues = new Float32Array(uniformBufferSize / 4);
-    uniformValues.set([0, 1, 0, 1], 0);
-
-    const bindGroup = device.createBindGroup({
+    const renderBindGroup = device.createBindGroup({
         layout: pipeline.getBindGroupLayout(0),
         entries: [
-            { binding: 0, resource: uniformBuffer },
+            { binding: 0, resource: computeTexture.createView() },
         ],
     });
 
@@ -86,58 +103,52 @@ async function main() {
         ],
     };
 
-    const startTime = performance.now();
-
     function render() {
         renderPassDescriptor.colorAttachments[0].view =
             context.getCurrentTexture().createView();
 
         const encoder = device.createCommandEncoder({ label: 'our encoder' });
 
-        const now = (performance.now() - startTime) * 0.001;        
+        {
+            const pass = encoder.beginComputePass();
+            pass.setPipeline(computePipeline);
+            pass.setBindGroup(0, computeBindGroup);
+
+            const wx = Math.ceil(canvas.width / 8);
+            const wy = Math.ceil(canvas.height / 8);
+            pass.dispatchWorkgroups(wx, wy);
+
+            pass.end();
+        }
+
+        {
+            renderPassDescriptor.colorAttachments[0].view =
+                context.getCurrentTexture().createView();
+
+            const pass = encoder.beginRenderPass(renderPassDescriptor);
+            pass.setPipeline(pipeline);
+            pass.setBindGroup(0, renderBindGroup);
+            pass.draw(6);
+            pass.end();
+        }
 
         const aspect = canvas.width / canvas.height;
-        uniformValues.set([aspect, 1], kScaleOffset);
-        uniformValues.set([now], kTimeOffset);
-        uniformValues.set([
-            (mouse.x / canvas.width) * 2.0 - 1.0, 
-            1.0 - (mouse.y / canvas.height) * 2.0
-        ], kMouseOffset);        
+        
+        let calculatedMousePositon = [
+            (mouse.x / canvas.width),
+            1.0 - (mouse.y / canvas.height)
+        ];
+        computeUniformValues.set([aspect, 1], cScaleOffset);
+        computeUniformValues.set(calculatedMousePositon, cMouseOffset);
+        computeUniformValues.set([1, 1, 1, 1], cColorOffset);
 
-        device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
-
-        const pass = encoder.beginRenderPass(renderPassDescriptor);
-        pass.setPipeline(pipeline);
-        pass.setBindGroup(0, bindGroup);
-        pass.draw(6)
-        pass.end()
-
-        const commandBuffer = encoder.finish();
-        device.queue.submit([commandBuffer]);
-        // setInterval(render, 1) // requestAnimationFrame or not doing anything crashes firefox, wait nope its anything
+        device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
+        
+        device.queue.submit([encoder.finish()]);
 
         requestAnimationFrame(render)
     }
 
     requestAnimationFrame(render)
-
-
-    // CRASHES FIREFOX
-    // const observer = new ResizeObserver(entries => {
-    //     for (const entry of entries) {
-    //         const width = entry.devicePixelContentBoxSize?.[0].inlineSize ||
-    //             entry.contentBoxSize[0].inlineSize * devicePixelRatio;
-    //         const height = entry.devicePixelContentBoxSize?.[0].blockSize ||
-    //             entry.contentBoxSize[0].blockSize * devicePixelRatio;
-    //         const canvas = entry.target as HTMLCanvasElement;
-    //         canvas.width = Math.max(1, Math.min(width, device.limits.maxTextureDimension2D));
-    //         canvas.height = Math.max(1, Math.min(height, device.limits.maxTextureDimension2D));
-    //     }
-    // });
-    // try {
-    //     observer.observe(canvas, { box: 'device-pixel-content-box' });
-    // } catch {
-    //     observer.observe(canvas, { box: 'content-box' });
-    // }
 }
 main()

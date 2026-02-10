@@ -1,0 +1,142 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <meta
+            name="description"
+            content="kaka nest is all about me and the stuff i enjoy doing, like tech, drama, programming and reading!"
+        />
+        <title>Kaka Nest</title>
+    </head>
+    <body>
+        <h1>Random Sorter</h1>
+        <div class="container">
+            <div class="shuffled" id="shuffled">
+                <div>
+                    <p>
+                        In the text area, write down items seperated by
+                        newlines, choose the amount of groups then click run to sort them into groups
+                    </p>
+                </div>
+            </div>
+            <form id="inputForm">
+                <div>
+                    <label for="inputs">Inputs:</label>
+                    <textarea
+                        name="inputs"
+                        id="inputs"
+                        cols="40"
+                        rows="20"
+                        placeholder="Items here, seperated by a newline"
+                    ></textarea>
+                </div>
+                <div>
+                    <label for="groups">Groups:</label>
+                    <input type="number" name="groups" />
+                </div>
+                <button type="submit">Run</button>
+            </form>
+        </div>
+    </body>
+</html>
+
+<style is:global>
+    .container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .shuffled {
+        display: flex;
+    }
+    #inputForm > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .shuffled > * {
+        border: 2px solid black;
+        display: flex;
+        flex-direction: column;
+        height: fit-content;
+        list-style: none;
+        padding-left: 0;
+        padding: 20px;
+        line-height: 1.5;
+        justify-content: center;
+    }
+</style>
+
+<script>
+    function shuffle(array) {
+        let currentIndex = array.length;
+
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
+            // Pick a remaining element...
+            let randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex],
+                array[currentIndex],
+            ];
+        }
+    }
+
+    const formElement = document.getElementById("inputForm") as HTMLFormElement;
+    const shuffledElement = document.getElementById("shuffled");
+    formElement.addEventListener("submit", (event) => {
+        event.preventDefault();
+        let data = new FormData(formElement);
+        let inputs = (data.get("inputs") as string)
+            .split("\n")
+            .map((item) => item.trim());
+        shuffle(inputs);
+
+        let groupString = (data.get("groups") as string | null)
+        let groups;
+        if (groupString == "") {
+            groups = 1
+        } else {
+            groups = parseInt(groupString, 10)
+        }
+
+        let groupSize = Math.floor(inputs.length / groups);
+        let remainder = inputs.length % groups;
+        let resultGroups: string[][] = [];
+
+        let start = 0;
+        for (let group = 0; group < groups; group++) {
+            let currentGroupSize = groupSize + (group < remainder ? 1 : 0); // Distribute extra items
+
+            let currentSlice = inputs.slice(start, start + currentGroupSize);
+            resultGroups.push(currentSlice);
+
+            start += currentGroupSize;
+        }
+
+        // clear before setting
+        shuffledElement.replaceChildren();
+        for (let group = 0; group < resultGroups.length; group++) {
+            const currentGroup = resultGroups[group];
+
+            let ulElement = document.createElement("ul");
+            let titleElement = document.createElement("h3");
+            titleElement.innerText = (group + 1).toString();
+            ulElement.appendChild(titleElement);
+            for (let i = 0; i < currentGroup.length; i++) {
+                const item = currentGroup[i];
+                const liElement = document.createElement("li");
+                liElement.innerText = item;
+
+                ulElement.appendChild(liElement);
+            }
+
+            shuffledElement.appendChild(ulElement);
+        }
+    });
+</script>
