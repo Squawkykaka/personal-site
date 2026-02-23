@@ -37,7 +37,6 @@ fn fs(@builtin(position) pos : vec4<f32>) -> @location(0) vec4<f32> {
     var coord = vec2<i32>(pos.xy);
     
     // Clamp to valid range
-    coord = clamp(coord, vec2<i32>(0,0), dims - vec2<i32>(1,1));
 
     let color = textureLoad(tex, coord, 0);
     return color;

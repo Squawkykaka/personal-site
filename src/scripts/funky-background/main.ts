@@ -48,7 +48,7 @@ async function main() {
         8 * 4  // color (vec4)
         ;
     const cScaleOffset = 0;
-    const cMouseOffset = 4;
+    const cMouseOffset = 2;
     const cColorOffset = 8;
     const computeUniformBuffer = device.createBuffer({
         label: 'Compute uniform buffer',
@@ -136,10 +136,10 @@ async function main() {
         
         let calculatedMousePositon = [
             (mouse.x / canvas.width),
-            1.0 - (mouse.y / canvas.height)
+         (mouse.y / canvas.height) 
         ];
         computeUniformValues.set([aspect, 1], cScaleOffset);
-        computeUniformValues.set(calculatedMousePositon, cMouseOffset);
+        computeUniformValues.set(calculatedMousePositon, cMouseOffset);        
         computeUniformValues.set([1, 1, 1, 1], cColorOffset);
 
         device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
