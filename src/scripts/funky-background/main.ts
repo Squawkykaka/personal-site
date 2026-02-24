@@ -6,13 +6,15 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 let rect = canvas.getBoundingClientRect()
 
-let mouse = { x: 0, y: 0 };
+let rangeSelectElement = document.getElementById("rangeSelect") as HTMLInputElement;
+
+let mouse = { x: 0, y: 0, pressed: false };
 document.addEventListener("pointermove", event => {
-    mouse = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-    }
+    mouse.x = event.clientX - rect.left;
+    mouse.y = event.clientY - rect.top;
 })
+document.addEventListener("pointerdown", event => mouse.pressed = true)
+document.addEventListener("pointerup", event => mouse.pressed = false)
 
 async function main() {
     const adapter = await navigator.gpu?.requestAdapter();
@@ -45,11 +47,11 @@ async function main() {
     const computeUniformSize =
         2 * 4 + // scale
         4 * 4 + // mouseX(vec2f)
-        8 * 4  // color (vec4)
+        2 * 4  // color (vec4)
         ;
     const cScaleOffset = 0;
     const cMouseOffset = 2;
-    const cColorOffset = 8;
+    const cElementOffset = 4;
     const computeUniformBuffer = device.createBuffer({
         label: 'Compute uniform buffer',
         size: computeUniformSize,
@@ -109,7 +111,20 @@ async function main() {
 
         const encoder = device.createCommandEncoder({ label: 'our encoder' });
 
-        {
+        if (mouse.pressed) {
+            // only run and upload compute related stuff when the mouse is pressed, as its the only time it matters
+            const aspect = canvas.width / canvas.height;
+
+            let calculatedMousePositon = [
+                (mouse.x / canvas.width),
+                (mouse.y / canvas.height)
+            ];
+            computeUniformValues.set([aspect, 1], cScaleOffset);
+            computeUniformValues.set(calculatedMousePositon, cMouseOffset);
+            computeUniformValues.set([parseFloat(rangeSelectElement.value)], cElementOffset);
+
+            device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
+
             const pass = encoder.beginComputePass();
             pass.setPipeline(computePipeline);
             pass.setBindGroup(0, computeBindGroup);
@@ -132,18 +147,6 @@ async function main() {
             pass.end();
         }
 
-        const aspect = canvas.width / canvas.height;
-        
-        let calculatedMousePositon = [
-            (mouse.x / canvas.width),
-         (mouse.y / canvas.height) 
-        ];
-        computeUniformValues.set([aspect, 1], cScaleOffset);
-        computeUniformValues.set(calculatedMousePositon, cMouseOffset);        
-        computeUniformValues.set([1, 1, 1, 1], cColorOffset);
-
-        device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
-        
         device.queue.submit([encoder.finish()]);
 
         requestAnimationFrame(render)
@@ -152,3 +155,7 @@ async function main() {
     requestAnimationFrame(render)
 }
 main()
+
+// function setupMouseDrawPipeline(device: GPUDevice) {
+    
+// }
