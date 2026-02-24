@@ -1,5 +1,6 @@
 import triangleWGSL from './triangle.wgsl?raw';
-import computeWGSL from './compute.wgsl?raw';
+import mouseDrawWGSL from './draw.wgsl?raw';
+import evolveWGSL from './evolve.wgsl?raw';
 
 const canvas = document.getElementById("background") as HTMLCanvasElement;
 canvas.width = canvas.offsetWidth;
@@ -31,41 +32,14 @@ async function main() {
         format: presentationFormat,
     });
 
-    const computeShader = device.createShaderModule({ code: computeWGSL });
-    const computeTexture = device.createTexture({
+    const frameTexture = device.createTexture({
         size: [canvas.width, canvas.height, 1],
         format: 'r32float',
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
     })
-    const computePipeline = device.createComputePipeline({
-        compute: {
-            module: computeShader,
-        },
-        layout: "auto",
-        label: 'compute image writing + growth thing'
-    });
-    const computeUniformSize =
-        2 * 4 + // scale
-        4 * 4 + // mouseX(vec2f)
-        2 * 4  // color (vec4)
-        ;
-    const cScaleOffset = 0;
-    const cMouseOffset = 2;
-    const cElementOffset = 4;
-    const computeUniformBuffer = device.createBuffer({
-        label: 'Compute uniform buffer',
-        size: computeUniformSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    })
-    const computeUniformValues = new Float32Array(computeUniformSize / 4);
-    const computeBindGroup = device.createBindGroup({
-        layout: computePipeline.getBindGroupLayout(0),
-        entries: [
-            { binding: 0, resource: computeTexture.createView() },
-            { binding: 1, resource: computeUniformBuffer }
-        ]
-    })
 
+    let { mouseDrawUniformValues, mouseDrawUniformBuffer, mouseDrawPipeline, mouseDrawBindGroup } = setupMouseDrawPipeline(device, frameTexture)
+    let { evolvePipeline, evolveBindGroup } = setupEvolvePipeline(device, frameTexture);
     // ***************
     // RENDER
 
@@ -89,7 +63,7 @@ async function main() {
     const renderBindGroup = device.createBindGroup({
         layout: pipeline.getBindGroupLayout(0),
         entries: [
-            { binding: 0, resource: computeTexture.createView() },
+            { binding: 0, resource: frameTexture.createView() },
         ],
     });
 
@@ -119,16 +93,32 @@ async function main() {
                 (mouse.x / canvas.width),
                 (mouse.y / canvas.height)
             ];
-            computeUniformValues.set([aspect, 1], cScaleOffset);
-            computeUniformValues.set(calculatedMousePositon, cMouseOffset);
-            computeUniformValues.set([parseFloat(rangeSelectElement.value)], cElementOffset);
 
-            device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
+            const cScaleOffset = 0;
+            const cMouseOffset = 2;
+            const cElementOffset = 4;
+
+            mouseDrawUniformValues.set([aspect, 1], cScaleOffset);
+            mouseDrawUniformValues.set(calculatedMousePositon, cMouseOffset);
+            mouseDrawUniformValues.set([parseFloat(rangeSelectElement.value)], cElementOffset);
+
+            device.queue.writeBuffer(mouseDrawUniformBuffer, 0, mouseDrawUniformValues);
 
             const pass = encoder.beginComputePass();
-            pass.setPipeline(computePipeline);
-            pass.setBindGroup(0, computeBindGroup);
+            pass.setPipeline(mouseDrawPipeline);
+            pass.setBindGroup(0, mouseDrawBindGroup);
 
+            const wx = Math.ceil(canvas.width / 8);
+            const wy = Math.ceil(canvas.height / 8);
+            pass.dispatchWorkgroups(wx, wy);
+
+            pass.end();
+        }
+
+        {
+            const pass = encoder.beginComputePass();
+            pass.setPipeline(evolvePipeline);
+            pass.setBindGroup(0, evolveBindGroup);
             const wx = Math.ceil(canvas.width / 8);
             const wy = Math.ceil(canvas.height / 8);
             pass.dispatchWorkgroups(wx, wy);
@@ -156,6 +146,70 @@ async function main() {
 }
 main()
 
-// function setupMouseDrawPipeline(device: GPUDevice) {
-    
-// }
+function setupMouseDrawPipeline(device: GPUDevice, frameTexture: GPUTexture) {
+    const computeShader = device.createShaderModule({ code: mouseDrawWGSL });
+    // const computeTexture = device.createTexture({
+    //     size: [canvas.width, canvas.height, 1],
+    //     format: 'r32float',
+    //     usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+    // })
+    const mouseDrawPipeline = device.createComputePipeline({
+        compute: {
+            module: computeShader,
+        },
+        layout: "auto",
+        label: 'compute image writing'
+    });
+    const computeUniformSize =
+        2 * 4 + // scale
+        4 * 4 + // mouseX(vec2f)
+        2 * 4  // color (vec4)
+        ;
+
+    const mouseDrawUniformBuffer = device.createBuffer({
+        label: 'Compute uniform buffer',
+        size: computeUniformSize,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    })
+    const mouseDrawUniformValues = new Float32Array(computeUniformSize / 4);
+    const mouseDrawBindGroup = device.createBindGroup({
+        layout: mouseDrawPipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: frameTexture.createView() },
+            { binding: 1, resource: mouseDrawUniformBuffer }
+        ]
+    })
+
+    return { mouseDrawUniformValues, mouseDrawUniformBuffer, mouseDrawPipeline, mouseDrawBindGroup }
+}
+
+function setupEvolvePipeline(device: GPUDevice, frameTexture: GPUTexture) {
+    const evolveShader = device.createShaderModule({ code: evolveWGSL });
+    const evolvePipeline = device.createComputePipeline({
+        compute: {
+            module: evolveShader,
+        },
+        layout: device.createPipelineLayout({
+            bindGroupLayouts: [device.createBindGroupLayout({
+                entries: [{
+                    binding: 0,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {
+                        access: "read-write",
+                        format: "r32float",
+                    },  
+                }],
+            })],
+        }),
+        label: "evolve shader pipeline"
+    });
+    const evolveBindGroup = device.createBindGroup({
+        layout: evolvePipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: frameTexture.createView() },
+        ],
+        label: "the evolve shader bind group",
+    });
+
+    return { evolvePipeline, evolveBindGroup }
+}
