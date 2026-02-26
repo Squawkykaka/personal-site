@@ -8,6 +8,7 @@ canvas.height = canvas.offsetHeight;
 let rect = canvas.getBoundingClientRect()
 
 let rangeSelectElement = document.getElementById("rangeSelect") as HTMLInputElement;
+let mergeEnabledElement = document.getElementById("mergeEnabled") as HTMLInputElement;
 
 let mouse = { x: 0, y: 0, pressed: false };
 document.addEventListener("pointermove", event => {
@@ -32,14 +33,19 @@ async function main() {
         format: presentationFormat,
     });
 
-    const frameTexture = device.createTexture({
+    const firstTexture = device.createTexture({
+        size: [canvas.width, canvas.height, 1],
+        format: 'r32float',
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+    })
+    const secondTexture = device.createTexture({
         size: [canvas.width, canvas.height, 1],
         format: 'r32float',
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
     })
 
-    let { mouseDrawUniformValues, mouseDrawUniformBuffer, mouseDrawPipeline, mouseDrawBindGroup } = setupMouseDrawPipeline(device, frameTexture)
-    let { evolvePipeline, evolveBindGroup } = setupEvolvePipeline(device, frameTexture);
+    let { mouseDrawUniformValues, mouseDrawUniformBuffer, mouseDrawPipeline, mouseDrawBindGroup } = setupMouseDrawPipeline(device, firstTexture)
+    let { evolvePipeline, evolveBindGroup1, evolveBindGroup2 } = setupEvolvePipeline(device, firstTexture, secondTexture);
     // ***************
     // RENDER
 
@@ -63,7 +69,13 @@ async function main() {
     const renderBindGroup = device.createBindGroup({
         layout: pipeline.getBindGroupLayout(0),
         entries: [
-            { binding: 0, resource: frameTexture.createView() },
+            { binding: 0, resource: secondTexture.createView() },
+        ],
+    });
+    const renderBindGroupNoEvolve = device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: firstTexture.createView() },
         ],
     });
 
@@ -115,10 +127,10 @@ async function main() {
             pass.end();
         }
 
-        {
+        if (mergeEnabledElement.checked) {
             const pass = encoder.beginComputePass();
             pass.setPipeline(evolvePipeline);
-            pass.setBindGroup(0, evolveBindGroup);
+            pass.setBindGroup(0, evolveBindGroup1);
             const wx = Math.ceil(canvas.width / 8);
             const wy = Math.ceil(canvas.height / 8);
             pass.dispatchWorkgroups(wx, wy);
@@ -132,13 +144,14 @@ async function main() {
 
             const pass = encoder.beginRenderPass(renderPassDescriptor);
             pass.setPipeline(pipeline);
-            pass.setBindGroup(0, renderBindGroup);
+            pass.setBindGroup(0, mergeEnabledElement.checked ? renderBindGroup : renderBindGroupNoEvolve);
             pass.draw(6);
             pass.end();
         }
 
         device.queue.submit([encoder.finish()]);
 
+        [evolveBindGroup1, evolveBindGroup2] = [evolveBindGroup2, evolveBindGroup1]
         requestAnimationFrame(render)
     }
 
@@ -183,7 +196,7 @@ function setupMouseDrawPipeline(device: GPUDevice, frameTexture: GPUTexture) {
     return { mouseDrawUniformValues, mouseDrawUniformBuffer, mouseDrawPipeline, mouseDrawBindGroup }
 }
 
-function setupEvolvePipeline(device: GPUDevice, frameTexture: GPUTexture) {
+function setupEvolvePipeline(device: GPUDevice, frameTexture: GPUTexture, secondTexture: GPUTexture) {
     const evolveShader = device.createShaderModule({ code: evolveWGSL });
     const evolvePipeline = device.createComputePipeline({
         compute: {
@@ -195,21 +208,38 @@ function setupEvolvePipeline(device: GPUDevice, frameTexture: GPUTexture) {
                     binding: 0,
                     visibility: GPUShaderStage.COMPUTE,
                     storageTexture: {
-                        access: "read-write",
+                        access: "read-only",
                         format: "r32float",
-                    },  
+                    },
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {
+                        access: "write-only",
+                        format: "r32float",
+                    },
                 }],
             })],
         }),
         label: "evolve shader pipeline"
     });
-    const evolveBindGroup = device.createBindGroup({
+    const evolveBindGroup1 = device.createBindGroup({
         layout: evolvePipeline.getBindGroupLayout(0),
         entries: [
             { binding: 0, resource: frameTexture.createView() },
+            { binding: 1, resource: secondTexture.createView() },
+        ],
+        label: "the evolve shader bind group",
+    });
+    const evolveBindGroup2 = device.createBindGroup({
+        layout: evolvePipeline.getBindGroupLayout(0),
+        entries: [
+            { binding: 1, resource: frameTexture.createView() },
+            { binding: 0, resource: secondTexture.createView() },
         ],
         label: "the evolve shader bind group",
     });
 
-    return { evolvePipeline, evolveBindGroup }
+    return { evolvePipeline, evolveBindGroup1, evolveBindGroup2 }
 }

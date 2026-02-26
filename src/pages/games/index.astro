@@ -16,7 +16,8 @@ const games = (await getCollection("games")).map((item) => {
 
 <canvas id="background"></canvas>
 <input type="range" name="range" id="rangeSelect" min="0", max="1", step="0.1">
-<h1>Heres my games ive made, enjoy :3</h1>
+<input type="checkbox" name="" id="mergeEnabled">
+<h1>Heres my games i've made, enjoy :3</h1>
 <div id="games">
     {
         games.map((game) => (

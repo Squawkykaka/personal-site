@@ -1,0 +1,177 @@
+---
+import githubSVG from "../../assets/github.svg";
+import script from "./script";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Astro</title>
+	</head>
+	<body>
+		<!-- have as a flashy moving thingy -->
+		<h1>Guess the F****** number!!!!!</h1>
+		<button id="createLobby">CREATE LOBBY</button>
+
+		<div id="signupForm" hidden>
+			<div>
+				<form>
+					<h3>MAKE AN ACCOUNT :33333</h3>
+					<input type="text" placeholder="Username" />
+					<input type="password" placeholder="Password" />
+					<input type="text" placeholder="Real Name" />
+					<input type="email" placeholder="Email" />
+					<input type="color" placeholder="Favorate Color" />
+					<input type="month" placeholder="What month you born?" />
+					<textarea
+						name="personalStory"
+						cols="30"
+						rows="10"
+						placeholder="A personal story about yourself"
+						minlength="100"></textarea>
+					<select name="" id="">
+						<option value="">No i suck</option>
+						<option value="">Meerkats</option>
+					</select>
+					<button type="submit">SEND ZE INFO</button>
+				</form>
+				<form>
+					<h3>GET BACK IN</h3>
+					<input type="text" placeholder="Username" />
+					<input type="password" placeholder="Password" />
+					<button type="submit">HECK THE MATRIX</button>
+				</form>
+			</div>
+			<h2>HAHA LOSER SIGN IN!</h2>
+			<p>delicious personal information :3</p>
+		</div>
+
+		<button id="joinLobby">JOIN LOBBY</button>
+
+		<a
+			href="https://github.com/squawkykaka/guess-the-number"
+			class="githubButton"
+			><img src={githubSVG.src} alt="github" width="30" height="30" /></a
+		>
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+	}
+
+	h1 {
+		text-align: center;
+		margin-bottom: 20%;
+	}
+
+	button {
+		width: 200px;
+		aspect-ratio: 4/1;
+		transition: transform 0.2s ease;
+	}
+
+	button:hover {
+		animation: elasticPing 0.6s ease-out;
+	}
+
+	button:active {
+		animation: elasticPing 0.6s ease-out;
+	}
+
+	@keyframes elasticPing {
+		0% {
+			transform: scale(1);
+		}
+		30% {
+			transform: scale(1.15);
+		}
+		50% {
+			transform: scale(0.95);
+		}
+		70% {
+			transform: scale(1.05);
+		}
+		85% {
+			transform: scale(0.98);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	#createLobby {
+		position: absolute;
+		left: 25%;
+		rotate: -10deg;
+	}
+
+	#joinLobby {
+		position: absolute;
+		right: 25%;
+		rotate: 10deg;
+	}
+
+	#signupForm {
+		position: absolute;
+		border: 5px solid black;
+		border-radius: 20px;
+		width: 50%;
+		z-index: 1;
+		left: 25%;
+		top: 25%;
+		background-color: white;
+	}
+
+	#signupForm > div {
+		display: flex;
+		flex-direction: row;
+		gap: 15px;
+		justify-content: space-between;
+	}
+
+	#signupForm form {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	#signupForm form > h3 {
+		text-align: center;
+	}
+
+	textarea {
+		resize: none;
+	}
+
+	.githubButton {
+		position: absolute;
+		bottom: 10px;
+		left: 10px;
+	}
+</style>
+
+<script src="./script"></script>
+
+<script>
+	let createlobbyElement = document.getElementById(
+		"createLobby",
+	) as HTMLButtonElement;
+	let joinlobbyElement = document.getElementById(
+		"joinLobby",
+	) as HTMLButtonElement;
+	let signupFormElement = document.getElementById(
+		"signupForm",
+	) as HTMLFormElement;
+
+	createlobbyElement.onclick = (event) => {
+		event.preventDefault();
+		signupFormElement.hidden = false;
+	};
+</script>

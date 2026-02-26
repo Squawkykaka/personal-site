@@ -7,7 +7,7 @@ const games = defineCollection({
     schema: (thing) => z.object({
         title: z.string(),
         description: z.string(),
-        type: z.enum(["q5js"])
+        type: z.enum(["html"])
     })
 })
 

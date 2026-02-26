@@ -1,3 +1,0 @@
-title = "Bear attack"
-description = "A game where you have to get the blueberrys and avoid bear attacks"
-type = "q5js" # could be wasm as well, maybe godot support later down the line ill start with q5

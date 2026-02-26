@@ -46,8 +46,6 @@ fn hsv2rgb(h: f32, s: f32, v: f32) -> vec3<f32> {
         vec2f( 1.0, -1.0)   // bottom right
     );
 
-    // var vsOutput: OurVertexShaderOutput;
-    // vsOutput.position = ;
 
     return vec4f(pos[vertexIndex] , 0.0, 1.0);
 }
@@ -56,10 +54,8 @@ fn hsv2rgb(h: f32, s: f32, v: f32) -> vec3<f32> {
 fn fs(@builtin(position) pos : vec4<f32>) -> @location(0) vec4<f32> {
     let dims = vec2<i32>(textureDimensions(tex));
     
-    // Convert clip-space to integer pixel coordinates
-    // pos.xy is in screen pixel space, usually already in [0, width/height]
+
     var coord = vec2<i32>(pos.xy);
-    
 
     let color = textureLoad(tex, coord, 0).r;
     if (color == 0.0) {
@@ -67,7 +63,6 @@ fn fs(@builtin(position) pos : vec4<f32>) -> @location(0) vec4<f32> {
     } else {
         let hue = fract(color);      // hue from your single float
         let rgb = hsv2rgb(hue, 1.0, 1.0);
-        return vec4<f32>(rgb, 1.0);
-
+        return vec4<f32>(rgb, 1.0); 
     }
 }

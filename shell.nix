@@ -1,6 +1,7 @@
 {pkgs ? import <nixpkgs> {}}: pkgs.mkShell {
         packages = [
           pkgs.typst
+          pkgs.tinymist
           pkgs.bun
         ];
 

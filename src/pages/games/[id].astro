@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths } from "astro";
+export const getStaticPaths = (() => {
+    let games = import.meta.glob("../../games/*/index.astro");
+
+    return Object.keys(games).map((path) => {
+        const match = path.match(/games\/(.+)\/index\.astro$/);
+
+        return {
+            params: { id: match[1] },
+        };
+    });
+}) satisfies GetStaticPaths;
+
+const { id } = Astro.params;
+
+let games = import.meta.glob("../../games/*/index.astro");
+const importer = games[`../../games/${id}/index.astro`];
+
+if (!importer) {
+  throw new Error(`Game not found: ${id}`);
+}
+
+const GameComponent = (await importer()).default;
+---
+
+<GameComponent />

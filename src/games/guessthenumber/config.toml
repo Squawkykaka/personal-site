@@ -1,0 +1,3 @@
+title = "Guess the number"
+description = "A game where you have to guess the number!!!!"
+type = "html" # could be wasm as well, maybe godot support later down the line ill start with q5
