@@ -28,6 +28,8 @@ fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
 
     if (count > 0.0) {
         let avg = sum / count;
-        textureStore(outTexture, coord, vec4f(avg, 0.0, 0.0, 1.0));
+        if ((f32(gid.x) * f32(gid.y)) % avg < 0.5) {
+            textureStore(outTexture, vec2<i32>(coord.x, coord.y), vec4f(avg * 0.999, 0.0, 0.0, 1.0));
+        }
     }
 }

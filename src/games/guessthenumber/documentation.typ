@@ -254,3 +254,7 @@ the owner can manage approving and denying login requests, as the owner has writ
 
 = Programming
 i wanted to integrate the game site into one of my other sites, so some code is spread around. all relavent code is contained inside the `src/games` directory so that should be the only directory judged to the standards. all other code is irrelevant
+
+= Journal
+== Day 2
+i setup firebase and added signing in automatically whenever the page is loaded, if you arnt signed in it gives you a prompt
