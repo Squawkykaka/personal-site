@@ -7,7 +7,9 @@
     "exclude": [
         "dist"
     ],
+
     "compilerOptions": {
+        "target": "esnext",
         "types": ["@webgpu/types"]
     },
 }

@@ -11,6 +11,7 @@ export default defineConfig({
   vite: {
     esbuild: {
       legalComments: "external",
+      target: "esnext",
     },
   },
   image: {

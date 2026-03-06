@@ -3,6 +3,7 @@
           pkgs.typst
           pkgs.tinymist
           pkgs.bun
+          pkgs.nodejs
         ];
 
         buildInputs = [
