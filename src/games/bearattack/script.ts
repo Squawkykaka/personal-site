@@ -9,48 +9,52 @@ function resizeCanvas() {
 // Resize when the window changes size
 window.addEventListener("resize", resizeCanvas);
 
-//  modifyable vartiables
+//  modifiable variables
 let scoreGoal = 5;
 let lives = 3;
 let gravity = 20;
 
 // dont change these
-let bear, floor, buttonGroup, berryGroup;
+let bear, floor;
 let score = 0;
 let timeHoldingSpace = 0;
 let gameState = 0;
-
-let player = spawnPlayer(50, 50);
-
 //  p5.js functions
-import berryImageSrc from "./assets/berry.jpg";
-import { spawnBear, spawnBerry, spawnButton, spawnFloor, spawnPlayer } from "./spawnFunctions";
 
 /**
  * This function loads all the images i need for the game.
  * @returns The images loaded
- */
-async function loadImages() {
-	let berryImage = loadImage(berryImageSrc.src);
-	let bearImage = loadImage("./assets/bear.jpg");
-	let bunnyImage = loadImage("./assets/bunny.jpg");
-	let backgroundImage = loadImage("./assets/background-modified.jpg");
+*/
 
-	await loadAll()
+function loadFromPath(name: string) {
+	let pathInfoElement = document.getElementById("pathInfo");
 
-	return [berryImage, bearImage, bunnyImage, backgroundImage]
+	let imagePath = pathInfoElement.getAttribute(name)
+
+	return loadImage(imagePath)
 }
 
-export const [berryImage, bearImage, bunnyImage, backgroundImage] = await loadImages();
+async function loadImages() {
+    let berryImage  = loadFromPath("berryImage");
+    let bearImage   = loadFromPath("bearImage");
+    let bunnyImage  = loadFromPath("bunnyImage");
+    let backgroundImage = loadFromPath("backgroundImage");
+    await loadAll();
+    return [berryImage, bearImage, bunnyImage, backgroundImage];
+}
 
-const CANVAS = await Canvas(windowWidth, windowHeight);
+export let [berryImage, bearImage, bunnyImage, backgroundImage] = await loadImages();
+import { spawnBear, spawnBerry, spawnButton, spawnFloor, spawnPlayer } from "./spawnFunctions";
+// let player = spawnPlayer(50, 50);
+
+
 // function setup() {
 frameRate(60);
 
 world.gravity.y = gravity;
 
-buttonGroup = new Group();
-berryGroup = new Group();
+export let buttonGroup = new Group();
+export let berryGroup = new Group();
 
 // Fix things hitting buttons, cant make buttons
 // have no colliders as otherwise they cant be clicked

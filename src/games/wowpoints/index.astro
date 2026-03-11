@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Wow Number</title>
+    </head>
+    <body>
+        <p id="wowCounter">0</p>
+        <button id="wowButton">WOW</button>
+    </body>
+</html>
+
+<script>
+    let wowCounter = document.getElementById("wowCounter");
+
+    const wowValue = new Proxy(
+        { value: 0 },
+        {
+            set(target, prop, value) {
+                target[prop] = value;
+                wowCounter.innerText = value.toString();
+                return true;
+            },
+        },
+    );;
+    let wowButton = document.getElementById("wowButton") as HTMLButtonElement;
+
+    wowButton.onclick = (event) => {
+        wowValue.value += 1;
+    };
+</script>

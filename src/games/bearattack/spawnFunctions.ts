@@ -1,7 +1,5 @@
-import { bearImage, berryImage, bunnyImage } from "./script";
+import { bearImage, berryGroup, berryImage, bunnyImage, buttonGroup } from "./script";
 
-export let buttonGroup = new Group();
-export let berryGroup = new Group();
 /**
  * Spawns a button at specified coords with a specified function
  * The coords get updated every frame

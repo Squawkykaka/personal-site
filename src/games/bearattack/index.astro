@@ -1,4 +1,9 @@
-
+---
+import berryImage from "./assets/berry.jpg";
+import bearImage from "./assets/bear.jpg";
+import bunnyImage from "./assets/bunny.jpg";
+import backgroundImage from "./assets/background.jpg";
+---
 
 <!doctype html>
 <html lang="en">
@@ -8,14 +13,22 @@
         <title>Bear Attack</title>
 
         <script type="module" src="https://q5js.org/q5.js"></script>
-        <script type="module" src="https://p5play.org/v3/planck.min.js"></script>
+        <script type="module" src="https://p5play.org/v3/planck.min.js"
+        ></script>
         <script type="module" src="https://p5play.org/v3/p5play.js"></script>
     </head>
     <!-- in order to run image optimisatoin i store the image sources in hidden divs -->
-    
-    <!-- <body></body> -->
 
+    <div
+        id="pathInfo"
+        berryImage={berryImage.src}
+        bearImage={bearImage.src}
+        bunnyImage={bunnyImage.src}
+        backgroundImage={backgroundImage.src}
+    >
+    </div>
     <script src="./script.ts"></script>
     <script src="./spawnFunctions.ts"></script>
+
 
 </html>
