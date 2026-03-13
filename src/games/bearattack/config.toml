@@ -1,3 +1,0 @@
-title = "Bear Attack"
-description = "Bear Attack game where you eat ze berries"
-type = "html" # could be wasm as well, maybe godot support later down the line ill start with q5
