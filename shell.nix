@@ -4,6 +4,8 @@
           pkgs.tinymist
           pkgs.bun
           pkgs.nodejs
+          pkgs.oxlint
+          pkgs.oxfmt
         ];
 
         buildInputs = [

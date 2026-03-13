@@ -9,12 +9,15 @@ tags:
   - "#database"
 description: Some ideas for database related stuff for my blog software
 ---
+
 Whenever a file gets changed, the files contents gets hashed and the change gets pushed into the database.
 
 ## computing html
+
 parsed sections of code get placed into the database, e.g. each codeblock and section, omly regenerating bits needing regernerating
 Possible problems
+
 - what if a template changes? what do i do then
 
-hash revision, all files *changed* for a specific version
-convert current 
+hash revision, all files _changed_ for a specific version
+convert current
