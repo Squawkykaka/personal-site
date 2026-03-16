@@ -3,7 +3,7 @@ import { glob, file } from "astro/loaders";
 import { z } from "astro/zod";
 
 const games = defineCollection({
-  loader: glob({ pattern: "*/config.toml", base: "./src/games" }),
+  loader: glob({ pattern: "*/config.toml", base: "./src/pages/games" }),
   schema: (thing) =>
     z.object({
       title: z.string(),
