@@ -2,6 +2,7 @@
 import githubSVG from "../../../assets/github.svg";
 import LobbyManager from "./LobbyManager.astro";
 import Login from "./Login.astro";
+// import Script from "./script";
 ---
 
 <html lang="en">
@@ -14,6 +15,7 @@ import Login from "./Login.astro";
 		<title>Guess the Number</title>
 	</head>
 	<body>
+		<!-- <Script client:only /> -->
 		<!-- have as a flashy moving thingy -->
 		<h1>GUESS THE F****** NUMBER</h1>
 		<div>
@@ -28,6 +30,36 @@ import Login from "./Login.astro";
 		>
 	</body>
 </html>
+
+<script>
+	import { getUser } from "./firebase";
+
+	let loginSection = document.getElementById("LoginSection") as HTMLElement;
+	let lobbySection = document.getElementById("LobbySection") as HTMLElement;
+	let createlobbyElement = document.getElementById(
+		"createLobby",
+	) as HTMLButtonElement;
+	let joinlobbyElement = document.getElementById(
+		"joinLobby",
+	) as HTMLButtonElement;
+	let signupFormElement = document.getElementById(
+		"signupForm",
+	) as HTMLFormElement;
+
+	createlobbyElement.onclick = (event) => {
+		event.preventDefault();
+		signupFormElement.hidden = false;
+		let user = getUser();
+		if (user) {
+			loginSection.hidden = true;
+			lobbySection.hidden = false;
+		} else {
+			loginSection.hidden = false;
+			lobbySection.hidden = true;
+		}
+	};
+
+</script>
 
 <style>
 	html,
@@ -46,5 +78,3 @@ import Login from "./Login.astro";
 		left: 10px;
 	}
 </style>
-
-<script src="./script"></script>

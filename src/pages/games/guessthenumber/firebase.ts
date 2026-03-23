@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { browserSessionPersistence, initializeAuth, type User } from "firebase/auth";
+import { browserSessionPersistence, createUserWithEmailAndPassword, initializeAuth, type User } from "firebase/auth";
 import { initializeFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -20,12 +20,42 @@ AUTH.setPersistence(browserSessionPersistence);
 
 let currentUser: User | null = null;
 AUTH.onAuthStateChanged((user) => {
-  currentUser = user;
+  currentUser = user;  
   console.log(user);
 });
 
 export function getUser() {
   return currentUser;
+}
+
+export type SignUpFormData = {
+  password: string;
+  username: string;
+  realName: string;
+  email: string;
+  favColor: string;
+  month: string;
+  personalStory: string;
+  meerkats: string;
+};
+
+export async function createAccount(formData: SignUpFormData) {
+  let meerkats = formData.meerkats ? "yes" : false
+  console.log(meerkats);
+
+  try {
+    let user = await createUserWithEmailAndPassword(AUTH, formData.email, formData.password);
+  } catch (error) {
+    console.log(error);
+    throw "User account creation failed."
+  }
+
+
+
+
+  // create actual user
+  // upload user data to user firebase section
+  // let 
 }
 
 export { DB, AUTH };
